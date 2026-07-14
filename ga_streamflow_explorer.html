@@ -153,6 +153,7 @@ tbody tr:nth-child(even){background:var(--sel-bg)}
     </div>
     <svg id="map" role="img" aria-label="Map of Georgia with gage locations"></svg>
     <div class="list-count" id="listCount"></div>
+    <div class="list-count"><a id="dlList" href="#" style="color:var(--series);text-decoration:none">Download this list (CSV)</a></div>
     <div class="site-list" id="siteList" role="listbox" aria-label="Gaging stations"></div>
   </aside>
 
@@ -163,7 +164,7 @@ tbody tr:nth-child(even){background:var(--sel-bg)}
     <div id="stationView" hidden>
       <section class="station-head">
         <h2 id="stName"></h2>
-        <div class="site-no-line">USGS <span id="stNo"></span> · <a id="stLink" target="_blank" rel="noopener">USGS monitoring page ↗</a></div>
+        <div class="site-no-line">USGS <span id="stNo"></span> · <a id="stLink" target="_blank" rel="noopener">USGS monitoring page ↗</a> · <a id="dlData" href="#">Download CSV</a></div>
         <div class="chips" id="chips"></div>
       </section>
 
@@ -1394,8 +1395,67 @@ function renderFoot(){
   a.target = "_blank"; a.rel = "noopener";
   a.textContent = "Station page on waterdata.usgs.gov";
   p3.appendChild(a);
+  p3.appendChild(document.createTextNode(" · "));
+  const dl = document.createElement("a");
+  dl.href = "https://github.com/j-evaristo/ga-streamflow/releases/download/dataset/dataset.tar.gz";
+  dl.textContent = "Download the complete dataset (CSV archive)";
+  p3.appendChild(dl);
   f.append(p0, p1, p2, p3);
 }
+
+/* ============================== CSV downloads ============================== */
+function csvEscape(v){
+  v = v == null ? "" : String(v);
+  return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+}
+function csvText(headerComments, columns, rows){
+  const lines = headerComments.map(c => "# " + c);
+  lines.push(columns.join(","));
+  rows.forEach(r => lines.push(r.map(csvEscape).join(",")));
+  return lines.join("\r\n") + "\r\n";
+}
+function saveCSV(filename, text){
+  const blob = new Blob([text], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+const isoDay = d => dOf(d).toISOString().slice(0, 10);
+function buildStationCSV(){
+  const [a, b] = visibleIndexRange();
+  const rows = [];
+  for (let i = a; i < b; i++) rows.push([state.site.no, isoDay(state.days[i]), state.vals[i]]);
+  const text = csvText([
+    "USGS " + state.site.no + " " + state.site.nm,
+    statLabel(state.stat) + " discharge, cubic feet per second (parameter 00060)",
+    "Date range " + isoDay(state.range[0]) + " to " + isoDay(state.range[1]),
+    "Source: USGS NWIS daily values, retrieved " + INDEX.generated + "; recent values may be provisional"
+  ], ["site_no", "date", "discharge_cfs"], rows);
+  return { filename: "USGS_" + state.site.no + "_discharge_" + isoDay(state.range[0]) + "_" + isoDay(state.range[1]) + ".csv", text };
+}
+function buildListCSV(){
+  const rows = filtered.map(s => {
+    const p = s.stats[s.pref];
+    return [s.no, s.nm, s.lat, s.lon, s.cty, s.huc, s.da == null ? "" : s.da, isoDay(p[0]), isoDay(p[1]), p[2]];
+  });
+  const text = csvText([
+    "USGS Georgia streamflow gaging stations (" + rows.length + " of " + SITES.length + " matching the current search)",
+    "Source: USGS NWIS, retrieved " + INDEX.generated
+  ], ["site_no", "station_nm", "lat", "lon", "county", "huc", "drainage_area_sqmi", "begin_date", "end_date", "n_daily_values"], rows);
+  return { filename: "usgs_ga_streamflow_stations.csv", text };
+}
+document.getElementById("dlData").addEventListener("click", e => {
+  e.preventDefault();
+  if (!state.site || !state.days) return;
+  const c = buildStationCSV(); saveCSV(c.filename, c.text);
+});
+document.getElementById("dlList").addEventListener("click", e => {
+  e.preventDefault();
+  const c = buildListCSV(); saveCSV(c.filename, c.text);
+});
 
 /* ============================== orchestration ============================== */
 function renderAll(){
