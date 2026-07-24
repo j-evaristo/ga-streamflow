@@ -15,6 +15,7 @@ import json
 import os
 import sys
 import time
+import http.client
 import urllib.request
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -90,14 +91,17 @@ def build_site_plan():
     return plan
 
 
-def fetch(url, tries=4):
+def fetch(url, tries=6):
     last = None
     for attempt in range(tries):
         try:
             req = urllib.request.Request(url, headers=HEADERS)
             with urllib.request.urlopen(req, timeout=120) as resp:
                 return resp.read().decode("utf-8")
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as e:
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError,
+                http.client.HTTPException, ValueError) as e:
+            # HTTPException/ValueError cover truncated or malformed chunked
+            # responses seen during waterservices brownouts - retry them too
             last = e
             code = getattr(e, "code", None)
             if code is not None and code == 404:

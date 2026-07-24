@@ -73,4 +73,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           sleep 900
-          gh run rerun ${{ github.run_id }} --failed --repo ${{ github.repository }}
+          gh run rerun ${{ github.run_id }} --failed --repo ${{ github.repository }} || \
+            echo "retry could not be triggered (already re-run or not retryable)"
