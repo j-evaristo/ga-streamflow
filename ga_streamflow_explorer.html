@@ -45,7 +45,7 @@ aside{background:var(--surface);border:1px solid var(--border);border-radius:12p
 .search-wrap input:focus{outline:2px solid var(--series);outline-offset:1px}
 .sort-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2)}
 .sort-row select{flex:1;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--page);color:var(--ink)}
-#map{width:100%;height:auto;display:block}
+#map{width:100%;height:auto;aspect-ratio:296/300;flex:0 0 auto;display:block}
 #map .dot{fill:var(--muted);opacity:.55;cursor:pointer}
 #map .dot:hover{opacity:1;fill:var(--series)}
 #map .dot.dim{opacity:.12}
@@ -138,7 +138,7 @@ tbody tr:nth-child(even){background:var(--sel-bg)}
 <div class="app">
   <aside aria-label="Gage selection">
     <div class="search-wrap">
-      <input id="searchBox" type="search" placeholder="Search 499 gages — number, name, county…"
+      <input id="searchBox" type="search" placeholder="Search gages — number, name, county…"
              aria-label="Search gages by number, name, or county" autocomplete="off">
     </div>
     <div class="sort-row">
@@ -359,6 +359,8 @@ const loaded = {};     // siteNo -> true once its script has run
   if (!INDEX){ return; }
   let total = 0, minB = Infinity, maxE = -Infinity;
   SITES.forEach(s => { const p = s.stats[s.pref]; total += p[2]; minB = Math.min(minB, p[0]); maxE = Math.max(maxE, p[1]); });
+  document.getElementById("searchBox").placeholder =
+    "Search " + SITES.length.toLocaleString("en-US") + " gages — number, name, county…";
   document.getElementById("headerSub").textContent =
     SITES.length + " gaging stations · " + (total/1e6).toFixed(1) + "M daily discharge records · " +
     yearOf(minB) + "–" + yearOf(maxE) + " · retrieved " + INDEX.generated;
