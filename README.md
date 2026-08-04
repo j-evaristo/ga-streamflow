@@ -3,7 +3,10 @@
 **Evaristo Critical Zone Hydrology Lab · University of Georgia**
 
 Complete daily discharge (streamflow) record for every USGS gaging station in
-Georgia, plus an interactive offline viewer. To publish the viewer on the web
+Georgia — plus the border-strip gages on shared rivers (St Marys, Suwannee,
+Apalachicola, Ochlockonee, Withlacoochee, Alapaha...) that USGS files under
+Florida, including those just downstream of the state line — with an
+interactive offline viewer. To publish the viewer on the web
 with automatic daily updates from USGS, see **[PUBLISHING.md](PUBLISHING.md)**.
 
 **Retrieved:** 2026-07-09 from the USGS National Water Information System (NWIS)
@@ -27,7 +30,8 @@ daily-values web service (`waterservices.usgs.gov/nwis/dv`), parameter code
 
 ## Dataset summary
 
-- **499** gaging stations (streams, tidal streams, 2 lake outlets), statewide
+- **607** gaging stations: every Georgia station plus the Georgia-Florida
+  border strip (streams, tidal streams, lake outlets)
 - **~5.42 million** daily discharge values, **1883-10-01 → 2026-07-09**
 - Statistic codes: daily **mean** (00003) at 484 stations; tidal-filtered and
   max/min statistics (00001/00002/00021–00024) at 15 coastal Savannah-area

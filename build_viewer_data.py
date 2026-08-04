@@ -141,6 +141,9 @@ def process_site_csv(site_no):
 def main():
     counties = load_counties()
     sites = parse_rdb(os.path.join(RAW, "ga_sites_expanded.rdb"))
+    border = os.path.join(RAW, "fl_border_sites_expanded.rdb")
+    if os.path.exists(border):
+        sites = sites + parse_rdb(border)
     meta = {s["site_no"]: s for s in sites}
 
     ga = json.load(open(os.path.join(ASSETS, "ga_boundary.json"), encoding="utf-8"))

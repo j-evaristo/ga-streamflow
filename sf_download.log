@@ -1,0 +1,30 @@
+refreshed ga_sites_expanded.rdb
+refreshed ga_series_catalog.rdb
+refreshed fl_border_sites_expanded.rdb
+refreshed fl_border_series_catalog.rdb
+607 sites to download through 2026-08-04
+[25/607] 02191740: ok (1431 rows)
+[50/607] 02197520: ok (9583 rows)
+[75/607] 02202000: ok (12509 rows)
+[100/607] 02204130: ok (8568 rows)
+[125/607] 02207435: ok (11835 rows)
+[150/607] 02214590: ok (6079 rows)
+[175/607] 02219500: ok (18079 rows)
+[200/607] 02224940: ok (6443 rows)
+[225/607] 02318000: ok (20213 rows)
+[250/607] 02335580: ok (7055 rows)
+[275/607] 023365218: ok (944 rows)
+[300/607] 02338400: ok (760 rows)
+[325/607] 02339500: ok (47483 rows)
+[350/607] 02344500: ok (32662 rows)
+[375/607] 02351890: ok (17033 rows)
+[400/607] 02381500: ok (3376 rows)
+[425/607] 02388300: ok (7814 rows)
+[450/607] 02392780: ok (7642 rows)
+[475/607] 02397000: ok (35221 rows)
+[500/607] 02229250: ok (1806 rows)
+[525/607] 02246459: ok (7501 rows)
+[550/607] 02326598: ok (118 rows)
+[575/607] 02327015: ok (1453 rows)
+[600/607] 02330000: ok (36494 rows)
+DONE: 607/607 sites ok, 6263098 total rows

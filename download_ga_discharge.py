@@ -23,6 +23,11 @@ from datetime import date
 
 BASE = "https://waterservices.usgs.gov/nwis/dv/"
 SITE_SERVICE = "https://waterservices.usgs.gov/nwis/site/"
+# Georgia-Florida border strip (west,south,east,north). Shared border rivers
+# (St Marys, Suwannee, Apalachicola, Ochlockonee, Withlacoochee, Alapaha...)
+# have gages that USGS files under Florida even where the stream IS the state
+# line - e.g. 02228500 St Marys at Moniac - plus near-border downstream gages.
+BORDER_BBOX = "-85.30,30.20,-81.40,31.00"
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, "data", "raw")
 CSV_DIR = os.path.join(ROOT, "data", "csv")
@@ -63,6 +68,12 @@ def fetch_catalogs():
         ("ga_series_catalog.rdb",
          SITE_SERVICE + "?format=rdb&stateCd=ga&parameterCd=00060"
          "&outputDataTypeCd=dv&siteStatus=all&seriesCatalogOutput=true"),
+        ("fl_border_sites_expanded.rdb",
+         SITE_SERVICE + "?format=rdb&bBox=" + BORDER_BBOX + "&parameterCd=00060"
+         "&hasDataTypeCd=dv&siteStatus=all&siteOutput=expanded"),
+        ("fl_border_series_catalog.rdb",
+         SITE_SERVICE + "?format=rdb&bBox=" + BORDER_BBOX + "&parameterCd=00060"
+         "&outputDataTypeCd=dv&siteStatus=all&seriesCatalogOutput=true"),
     ]
     for name, url in targets:
         path = os.path.join(RAW, name)
@@ -82,6 +93,9 @@ def fetch_catalogs():
 
 def build_site_plan():
     cat = parse_rdb(os.path.join(RAW, "ga_series_catalog.rdb"))
+    border = os.path.join(RAW, "fl_border_series_catalog.rdb")
+    if os.path.exists(border):
+        cat = cat + parse_rdb(border)
     q = [r for r in cat if r["parm_cd"] == "00060" and r["data_type_cd"] == "dv"]
     plan = {}
     for r in q:
