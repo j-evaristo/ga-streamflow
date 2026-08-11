@@ -268,6 +268,14 @@ tbody tr:nth-child(even){background:var(--sel-bg)}
 <script src="data/sites_index.js"></script>
 <script>
 "use strict";
+/* Privacy-friendly usage counts (GoatCounter): no cookies, no personal data.
+   Events record which stations and downloads people use; localhost visits
+   are ignored by the counter automatically. */
+function gcCount(path, isEvent){
+  if (window.goatcounter && window.goatcounter.count){
+    window.goatcounter.count({ path: path, event: isEvent !== false });
+  }
+}
 /* ============================== utilities ============================== */
 const DAY = 86400000;
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -496,6 +504,7 @@ function selectSite(no){
   if (!s) return;
   state.site = s;
   state.stat = s.pref;
+  gcCount("ga-streamflow/site/" + no);
   history.replaceState(null, "", "#site=" + no);
   document.getElementById("emptyState").hidden = true;
   document.getElementById("stationView").hidden = false;
@@ -1498,10 +1507,12 @@ document.getElementById("dlData").addEventListener("click", e => {
   e.preventDefault();
   if (!state.site || !state.days) return;
   const c = buildStationCSV(); saveCSV(c.filename, c.text);
+  gcCount("ga-streamflow/download/station-csv");
 });
 document.getElementById("dlList").addEventListener("click", e => {
   e.preventDefault();
   const c = buildListCSV(); saveCSV(c.filename, c.text);
+  gcCount("ga-streamflow/download/list-csv");
 });
 
 /* ============================== orchestration ============================== */
@@ -1517,6 +1528,10 @@ function renderAll(){
   renderTables(years, sorted);
   renderFoot();
 }
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest('a[href*="releases/download/dataset"]');
+  if (a) gcCount("ga-streamflow/download/archive");
+});
 const renderAllDebounced = debounce(renderAll, 120);
 new ResizeObserver(() => renderAllDebounced()).observe(document.getElementById("main"));
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") renderAll(); });
@@ -1539,5 +1554,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
   selectSite(start);
 })();
 </script>
+<script data-goatcounter="https://evaristo.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
