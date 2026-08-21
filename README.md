@@ -1,6 +1,6 @@
 # Georgia USGS Streamflow Data & Explorer
 
-**Evaristo Critical Zone Hydrology Lab · University of Georgia**
+**Evaristo Critical Zone Hydrology Lab**
 
 Complete daily discharge (streamflow) record for every USGS gaging station in
 Georgia — plus the border-strip gages on shared rivers (St Marys, Suwannee,

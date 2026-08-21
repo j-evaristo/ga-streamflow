@@ -73,7 +73,7 @@ the clock.
 
 ---
 
-## Option B: your own web server (e.g. UGA hosting) + cron
+## Option B: your own web server + cron
 
 If the lab has a Linux web server, run the same two scripts on a cron schedule
 and copy the results into the web root:
