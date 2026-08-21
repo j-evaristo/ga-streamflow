@@ -18,7 +18,7 @@ daily-values web service (`waterservices.usgs.gov/nwis/dv`), parameter code
 | Path | What it is |
 |---|---|
 | `ga_streamflow_explorer.html` | **Interactive viewer** — open directly in any browser (double-click; no server needed). Keep the `data/` folder next to it. |
-| `data/csv/USGS_<site>.csv` | Daily values per station, long format: `site_no, date, stat_cd, discharge_cfs, qualifiers` (qualifiers: `A`=approved, `P`=provisional, `e`=estimated). 499 files, ~5.42 M rows. |
+| `data/csv/USGS_<site>.csv` | Daily values per station, long format: `site_no, date, stat_cd, discharge_cfs, qualifiers, method_id, method_desc` (qualifiers: `A`=approved, `P`=provisional, `e`=estimated). 499 files, ~5.42 M rows. |
 | `data/sites_metadata.csv` | One row per station: name, coordinates, county, HUC, drainage area, altitude, period of record, record counts, stat codes, provisional/estimated counts. |
 | `data/raw/ga_sites_expanded.rdb` | Original USGS site file (expanded metadata, tab-delimited RDB). |
 | `data/raw/ga_series_catalog.rdb` | Original USGS series catalog (period of record per series). |
@@ -58,6 +58,12 @@ python build_viewer_data.py       # rebuilds the viewer data files
 
 The included GitHub Actions workflow (`.github/workflows/update-data.yml`) runs
 these automatically every day — see [PUBLISHING.md](PUBLISHING.md).
+
+**Multi-method sites:** a few stations report the same statistic through more
+than one measurement method (e.g. "[Generation]" vs "[Generation + Bypass]").
+The CSVs keep every method, labeled by `method_id`/`method_desc`; the viewer
+plots one canonical series per statistic — the most complete method's record,
+gap-filled from the others.
 
 **Note:** recent values are provisional and subject to revision by USGS.
 Cite as: U.S. Geological Survey, National Water Information System (NWISWeb),

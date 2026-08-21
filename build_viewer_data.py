@@ -100,7 +100,7 @@ def process_site_csv(site_no):
     path = os.path.join(CSV_DIR, f"USGS_{site_no}.csv")
     if not os.path.exists(path):
         return None
-    per_stat = {}   # stat -> {epoch_day: value}
+    per_method = {}   # (stat, method_id) -> {epoch_day: value}
     quals = {"P": 0, "e": 0}
     with open(path, encoding="utf-8") as f:
         r = csv.DictReader(f)
@@ -115,8 +115,8 @@ def process_site_csv(site_no):
                 except ValueError:
                     v = None
             d = epoch_day(row["date"])
-            bucket = per_stat.setdefault(stat, {})
-            # dedup across method blocks: keep first non-null
+            mid = row.get("method_id") or ""
+            bucket = per_method.setdefault((stat, mid), {})
             if d not in bucket or (bucket[d] is None and v is not None):
                 bucket[d] = v
             q = row["qualifiers"]
@@ -124,6 +124,26 @@ def process_site_csv(site_no):
                 quals["P"] += 1
             if "e" in q.split():
                 quals["e"] += 1
+    # A few sites publish the same statistic through more than one method
+    # (e.g. "[Generation]" vs "[Generation + Bypass]") with different values.
+    # Pick one canonical method per statistic - the most complete record,
+    # ties broken toward the larger total (the more inclusive measurement) -
+    # then fill only the dates it lacks from the remaining methods.
+    per_stat = {}
+    by_stat = {}
+    for (stat, mid), days in per_method.items():
+        by_stat.setdefault(stat, []).append(days)
+    for stat, buckets in by_stat.items():
+        def method_rank(b):
+            vals = [v for v in b.values() if v is not None]
+            return (len(vals), sum(vals))
+        buckets.sort(key=method_rank, reverse=True)
+        merged = {}
+        for b in buckets:
+            for d, v in b.items():
+                if d not in merged or (merged[d] is None and v is not None):
+                    merged[d] = v
+        per_stat[stat] = merged
     series = {}
     for stat, days in per_stat.items():
         pts = sorted((d, clean_num(v)) for d, v in days.items() if v is not None)

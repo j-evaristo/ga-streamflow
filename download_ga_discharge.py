@@ -138,7 +138,9 @@ def download_site(site_no, info):
     n = 0
     with open(os.path.join(CSV_DIR, f"USGS_{site_no}.csv"), "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["site_no", "date", "stat_cd", "discharge_cfs", "qualifiers"])
+        w.writerow(["site_no", "date", "stat_cd", "discharge_cfs", "qualifiers",
+                    "method_id", "method_desc"])
+        seen = set()
         for ts in ts_list:
             var = ts.get("variable", {})
             if var.get("variableCode", [{}])[0].get("value") != "00060":
@@ -147,6 +149,9 @@ def download_site(site_no, info):
                     .get("optionCode", ""))
             nodata = var.get("noDataValue", -999999)
             for block in ts.get("values", []):
+                m = (block.get("method") or [{}])[0]
+                mid = str(m.get("methodID") or "")
+                mdesc = (m.get("methodDescription") or "").strip()
                 for v in block.get("value", []):
                     raw = v.get("value")
                     quals = " ".join(v.get("qualifiers", []))
@@ -156,8 +161,13 @@ def download_site(site_no, info):
                         num = None
                     if num is not None and num == nodata:
                         num = None
-                    w.writerow([site_no, v["dateTime"][:10], stat,
-                                "" if num is None else raw, quals])
+                    day = v["dateTime"][:10]
+                    key = (stat, day, raw, mid)
+                    if key in seen:      # some sites repeat an identical block
+                        continue
+                    seen.add(key)
+                    w.writerow([site_no, day, stat,
+                                "" if num is None else raw, quals, mid, mdesc])
                     n += 1
     return site_no, n, "ok"
 
